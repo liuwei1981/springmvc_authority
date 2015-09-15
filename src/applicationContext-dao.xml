@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+	default-lazy-init="false">
+	
+	<tx:annotation-driven/>   
+	
+	<aop:aspectj-autoproxy/>
+   
+	<aop:spring-configured/>
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://127.0.0.1/authority"/>
+		<property name="username" value="root"/>
+		<property name="password" value="root"/>
+		<property name="maxActive" value="100"/>
+		<property name="maxWait" value="1000"/>
+		<property name="poolPreparedStatements" value="true"/>
+		<property name="maxOpenPreparedStatements" value="40"/>
+		<property name="defaultAutoCommit" value="true"/>
+	</bean>    
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.lw.</value>
+			</list>
+		</property>
+		<property name="useTransactionAwareDataSource" value="true" />
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernate.dialect.MySQLDialect
+				connection.characterEncoding=UTF-8
+				hibernate.show_sql=true
+				hibernate.format_sql=true
+				hibernate.query.substitutions=true '1', false '0'
+				hibernate.cache.use_second_level_cache=true
+				hibernate.cache.provider_class=com.opensymphony.oscache.hibernate.OSCacheProvider
+				hibernate.search.default.directory_provider=org.hibernate.search.store.FSDirectoryProvider
+				hibernate.jdbc.batch_size=50
+			</value>
+		</property>
+		<property name="eventListeners">
+			<map>
+				<entry key="merge">
+					<list>
+						<bean class="org.hibernate.event.def.DefaultMergeEventListener" />
+					</list>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">  
+		<property name="sessionFactory" ref="sessionFactory" />  
+	</bean>  
+</beans>
